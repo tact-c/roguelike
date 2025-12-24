@@ -1,51 +1,70 @@
 #include <cstdio>
 #include <iostream>
+#ifdef _WIN32
+#include <windows.h>
+void enableVTMode() {
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hOut == INVALID_HANDLE_VALUE) return;
 
-class Player{
-	public:
-		int plcoordx;
-		int plcoordy;
-		int currentroomwidth;
-		int currentroomheight;
-		void movepl(char input){
-			switch(input){
-				case 'w':
-					if(plcoordy>0){
-						plcoordy--;}
-					else break;
-					break;
-				case 's':
-					if(plcoordy<currentroomheight-1){
-						plcoordy++;}
-					else break;
-					break;
-				case 'a':
-					if(plcoordx>0){
-						plcoordx--;}
-					else break;
-					break;
-				case 'd':
-					if(plcoordx<currentroomwidth-1){
-						plcoordx++;}
-					else break;
-					break;
-				default: break;}
-		}
-};
+    DWORD mode = 0;
+    if (!GetConsoleMode(hOut, &mode)) return;
+
+    mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(hOut, mode);
+}
+#else
+void enableVTMode(){}
+#endif
 
 class Room{
 	public:
-		int roomwidth;
-		int roomheight;
-		int roominitx;
-		int roominity;
-		void render(Player prototype){
-			for(int y=0; y<roomheight; y++){
-				for(int x=0; x<roomwidth; x++){
-					if(prototype.plcoordx==x&&prototype.plcoordy==y){
-						std::cout<<'@';
+	int roomwidth;
+	int roomheight;
+	int initxcoord;
+	int initycoord;
+	Room(int x, int y, int initx, int inity){
+		roomwidth=x;
+		roomheight=y;
+		initxcoord=initx;
+		initycoord=inity;}
+};
+
+class Player{
+	public:
+		int xcoord;
+		int ycoord;
+		Player(Room currentroom){
+			xcoord=currentroom.initxcoord;
+			ycoord=currentroom.initycoord;}
+		void movement(Room currentroom, char x){
+			switch(x){
+				case 'w':
+					if(ycoord>0){
+						ycoord--;
 					}
-					else std::cout<<'#';
+					break;
+				case 's':
+					if(ycoord<currentroom.roomheight){
+						ycoord++;
+					}
+					break;
+				case 'a':
+					if(xcoord>0){
+						xcoord--;
+					}
+					break;
+				case 'd':
+					if(xcoord<currentroom.roomwidth){
+						xcoord++;
+					}
+					break;
+				default: break;
+			}
+			for(int a = 0; a<currentroom.roomheight; a++){
+				for(int b = 0; b<currentroom.roomwidth; b++){
+					if(xcoord==b && ycoord==a){
+						std::cout<<'@';
+					} else std::cout<<'#';
 				}
 				std::cout<<std::endl;
 			}
@@ -53,19 +72,14 @@ class Room{
 };
 
 int main(){
-	Player player;
-	Room room;
-	room.roomheight=10;
-	room.roomwidth=10;
-	room.roominitx=5;
-	room.roominity=9;
-	player.currentroomheight=room.roomheight;
-	player.currentroomwidth=room.roomwidth;
-	player.plcoordx=room.roominitx;
-	player.plcoordy=room.roominity;
-	do{
+	Room room(10, 10, 4, 4);
+	Player player(room);
+	enableVTMode();
+
+	while(1){
+		char a = getchar();
 		std::cout<<"\033[2J\033[H"<<std::endl;
-		room.render(player);
-		player.movepl(getchar());
-		}while(1);
+		player.movement(room,a);
+	}
+	return 0;
 }
