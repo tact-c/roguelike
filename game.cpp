@@ -1,5 +1,3 @@
-#include <cstdio>
-#include <iostream>
 #ifdef _WIN32
 #include <windows.h>
 void enableVTMode() {
@@ -15,7 +13,7 @@ void enableVTMode() {
 #else
 void enableVTMode(){}
 #endif
-
+import std;
 class Room{
 	public:
 	int roomwidth;
@@ -63,10 +61,10 @@ class Player{
 			for(int a = 0; a<currentroom.roomheight; a++){
 				for(int b = 0; b<currentroom.roomwidth; b++){
 					if(xcoord==b && ycoord==a){
-						std::cout<<'@';
-					} else std::cout<<'#';
+						std::print("@");
+					} else std::print("#");
 				}
-				std::cout<<std::endl;
+				std::print("\n");
 			}
 		}
 };
@@ -75,10 +73,10 @@ int main(){
 	Room room(10, 10, 4, 4);
 	Player player(room);
 	enableVTMode();
-
+	char a;
 	while(1){
-		char a = getchar();
-		std::cout<<"\033[2J\033[H"<<std::endl;
+		std::cin.get(a);
+		std::println("\033[2J\033[H");
 		player.movement(room,a);
 	}
 	return 0;
